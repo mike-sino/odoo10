@@ -1,0 +1,48 @@
+version: '3'
+
+volumes:
+  odoo10-web-data:
+  odoo10-db-data:
+
+services:
+  db:
+    image: postgres:9.5
+    container_name: odoo10-db
+    environment:
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo10-db-data:/var/lib/postgresql/data/pgdata
+    restart: always
+  
+  odoo10:
+    container_name: odoo10
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    image: odoo:10
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo10-web-data:/var/lib/odoo
+      - ./docker/config/odoo.conf:/etc/odoo/odoo.conf
+      - ./log/odoo-server.log:/etc/odoo/odoo-server.log
+      - ./extra-addons:/mnt/extra-addons
+      - ./addons:/usr/lib/python2.7/dist-packages/odoo/addons
+    restart: always   
+  
+  phpPgAdmin:
+    container_name: phppgadmin
+    image: zhajor/docker-phppgadmin
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432 
+    ports:
+      - 8080:80
+    restart: always
+      
