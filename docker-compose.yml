@@ -45,4 +45,13 @@ services:
     ports:
       - 8080:80
     restart: always
-      
+
+  nginx:
+    container_name: odoo10-nginx    
+    image: nginx
+    volumes:
+      - ./docker/config/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    links:
+      - odoo10
